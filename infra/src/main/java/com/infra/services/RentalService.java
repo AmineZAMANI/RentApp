@@ -12,6 +12,7 @@ import com.domain.RentalPeriod;
 import com.infra.exceptions.CarAlreadyRentedException;
 import com.infra.exceptions.CarNotFoundException;
 import com.infra.exceptions.CustomerNotFoundException;
+import com.infra.kafka.EventPublisher;
 import com.infra.repositories.CarRepository;
 import com.infra.repositories.CustomerRepository;
 import com.infra.repositories.RentalRepository;
@@ -22,13 +23,17 @@ public class RentalService {
 	private final CarRepository carRepository;
 	private final CustomerRepository customerRepository;
 	private final RentalRepository rentalRepository;
-
+	private final EventPublisher carRentalProducer;
+	private final EventPublisher carReturnProducer;
+	
 	public RentalService(com.domain.usecases.RentalUseCase rentalService, CarRepository carRepository,
-			CustomerRepository customerRepository, RentalRepository rentalRepository) {
+			CustomerRepository customerRepository, RentalRepository rentalRepository, EventPublisher carRentalProducer, EventPublisher carReturnProducer) {
 		this.rentalService = rentalService;
 		this.carRepository = carRepository;
 		this.customerRepository = customerRepository;
 		this.rentalRepository = rentalRepository;
+		this.carReturnProducer = carReturnProducer;
+		this.carRentalProducer = carRentalProducer;
 	}
 
 	public Rental rentCar(Long carId, Long customerId, LocalDate startDate, LocalDate endDate) {
@@ -47,6 +52,8 @@ public class RentalService {
 		rental.calculateDurationInDays();
 		rental.rentCar();
 		rentalRepository.save(rental);
+		/**Publish a message to notify other systems about the car rental*/
+		this.carRentalProducer.publish("The car " + carId + " was rented by " + customerId);
 		return rental;
 	}
 
@@ -55,6 +62,9 @@ public class RentalService {
 				.orElseThrow(() -> new IllegalArgumentException("Rental not found"));
 		rental.returnCar();
 		rentalRepository.save(rental);
+		/**Publish a message to notify other systems about the car return change*/
+		this.carReturnProducer
+				.publish("The car " + rental.getCar().getId() + " was returned by " + rental.getCustomer().getName());
 		return rental;
 	}
 }
