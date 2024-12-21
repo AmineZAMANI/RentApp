@@ -1,4 +1,4 @@
-package com.domain.services;
+package com.domain.usecases;
 
 import java.time.LocalDate;
 

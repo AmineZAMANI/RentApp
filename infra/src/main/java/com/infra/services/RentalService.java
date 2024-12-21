@@ -18,12 +18,12 @@ import com.infra.repositories.RentalRepository;
 
 @Service
 public class RentalService {
-	private final com.domain.services.RentalUseCase rentalService;
+	private final com.domain.usecases.RentalUseCase rentalService;
 	private final CarRepository carRepository;
 	private final CustomerRepository customerRepository;
 	private final RentalRepository rentalRepository;
 
-	public RentalService(com.domain.services.RentalUseCase rentalService, CarRepository carRepository,
+	public RentalService(com.domain.usecases.RentalUseCase rentalService, CarRepository carRepository,
 			CustomerRepository customerRepository, RentalRepository rentalRepository) {
 		this.rentalService = rentalService;
 		this.carRepository = carRepository;
@@ -40,7 +40,7 @@ public class RentalService {
 			throw new CarAlreadyRentedException("Rental not allowed");
 		}
 
-		Rental rental = Rental
+		final Rental rental = Rental
 				.builder().car(car).customer(customer).rentalPeriod(RentalPeriod.builder().startDate(startDate)
 						.endDate(endDate).durationDays((int) ChronoUnit.DAYS.between(startDate, endDate)).build())
 				.build();

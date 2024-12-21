@@ -11,7 +11,7 @@ import com.infra.exceptions.CarNotFoundException;
 import com.infra.exceptions.CustomerNotFoundException;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class RentalExceptionHandler {
 
     @ExceptionHandler(CarAlreadyRentedException.class)
     public ResponseEntity<ErrorResponse> handleCarAlreadyRented(CarAlreadyRentedException ex) {
