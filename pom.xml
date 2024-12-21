@@ -37,7 +37,6 @@
 	<modules>
 		<module>domain</module>
 		<module>infra</module>
-		<module>api</module>
 		<module>application</module>
 	</modules>
 </project>
