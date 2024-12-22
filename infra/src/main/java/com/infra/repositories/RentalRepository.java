@@ -2,8 +2,8 @@ package com.infra.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.domain.Rental;
+import com.infra.entity.RentalEntity;
 
-public interface RentalRepository extends JpaRepository<Rental, Long> {
+public interface RentalRepository extends JpaRepository<RentalEntity, Long> {
 }
 

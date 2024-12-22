@@ -1,25 +1,19 @@
-package com.application.dtos;
+package com.common.dtos;
 
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class RentalDTO {
+public class RentalPeriodDTO {
     private Long id;
-    private Long customerId;
-    private Long carId;
+    private int durationDay;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDate startDate;
+	private LocalDate startDate;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDate endDate;
+	private LocalDate endDate;
 }
-

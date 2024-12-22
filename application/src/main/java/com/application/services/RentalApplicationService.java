@@ -2,8 +2,8 @@ package com.application.services;
 
 import org.springframework.stereotype.Service;
 
-import com.application.dtos.RentalDTO;
-import com.application.mappers.RentalMapper;
+import com.common.dtos.RentalDTO;
+import com.common.mappers.RentalMapper;
 import com.domain.Rental;
 import com.infra.repositories.CustomerRepository;
 import com.infra.services.RentalService;

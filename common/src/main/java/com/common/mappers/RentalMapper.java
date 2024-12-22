@@ -1,9 +1,9 @@
-package com.application.mappers;
+package com.common.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.application.dtos.RentalDTO;
+import com.common.dtos.RentalDTO;
 import com.domain.Rental;
 
 @Mapper(componentModel = "spring", uses = {CarMapper.class, CustomerMapper.class})
