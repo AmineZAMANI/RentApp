@@ -1,7 +1,5 @@
 package com.infra.entity;
 
-import java.time.temporal.ChronoUnit;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -38,16 +36,4 @@ public class RentalEntity {
 	@JoinColumn(name = "rental_period_id", nullable = false)
 	private RentalPeriodEntity rentalPeriod;
 
-	public void returnCar() {
-		this.car.markAsAvailable();
-	}
-	
-	public void rentCar() {
-		this.car.markAsRented();
-	}
-
-
-	public void calculateDurationInDays() {
-		this.rentalPeriod.setDurationDays((int) ChronoUnit.DAYS.between(this.rentalPeriod.getStartDate(), this.rentalPeriod.getEndDate()));
-	}
 }

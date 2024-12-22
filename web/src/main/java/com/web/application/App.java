@@ -1,4 +1,4 @@
-package com.application;
+package com.web.application;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,9 +7,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.infra", "com.domain", "com.application"})
-@EntityScan(basePackages = {"com.domain", "com.infra.services.*"})
-@EnableJpaRepositories(basePackages = "com.infra.repositories")
+@ComponentScan(basePackages = { "com.application", "com.web", "com.infra", "com.common" })
+@EntityScan(basePackages = { "com.infra"})
+@EnableJpaRepositories(basePackages = {"com.infra"})
 public class App {
 	public static void main(String[] args) {
 		SpringApplication.run(App.class, args);
