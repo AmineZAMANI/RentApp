@@ -2,33 +2,24 @@ package com.application.services;
 
 import org.springframework.stereotype.Service;
 
-import com.common.dtos.RentalDTO;
-import com.common.mappers.RentalMapper;
 import com.domain.Rental;
-import com.infra.repositories.CustomerRepository;
-import com.infra.services.RentalService;
+import com.domain.repositories.Rentals;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class RentalApplicationService {
 
-    private final RentalService rentalService;
-    private final RentalMapper rentalMapper;
-    
+    private final Rentals rentals;
 
-    public RentalApplicationService(RentalService rentalService, CustomerRepository customerRepository, RentalMapper rentalMapper) {
-        this.rentalService = rentalService;
-        this.rentalMapper = rentalMapper;
+    public Rental rentCar(Rental rental) {
+       return rentals.rent(rental);
     }
 
-    // Rent a car
-    public RentalDTO rentCar(RentalDTO rentalDTO) {
-        Rental rental = rentalService.rentCar(rentalDTO.getCarId(), rentalDTO.getCustomerId(), rentalDTO.getStartDate(), rentalDTO.getEndDate());
-        return this.rentalMapper.toDTO(rental);
-    }
-
-    // Return a car
-    public RentalDTO returnCar(Long rentalId) {
-        Rental rental = rentalService.returnCar(rentalId);
-        return this.rentalMapper.toDTO(rental);
+    public Rental returnCar(Rental rental) {
+        return rentals.returnCar(rental);
     }
 }

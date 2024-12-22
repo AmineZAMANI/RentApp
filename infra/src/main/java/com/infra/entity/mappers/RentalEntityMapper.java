@@ -9,6 +9,5 @@ import com.infra.entity.RentalEntity;
 public interface RentalEntityMapper {
 
     Rental toModel(RentalEntity rental);
-
     RentalEntity toEntity(Rental rental);
 }
