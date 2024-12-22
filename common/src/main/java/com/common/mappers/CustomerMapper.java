@@ -1,8 +1,8 @@
-package com.application.mappers;
+package com.common.mappers;
 
 import org.mapstruct.Mapper;
 
-import com.application.dtos.CustomerDTO;
+import com.common.dtos.CustomerDTO;
 import com.domain.Customer;
 
 @Mapper(componentModel = "spring")

@@ -1,4 +1,4 @@
-package com.application.dtos;
+package com.common.dtos;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

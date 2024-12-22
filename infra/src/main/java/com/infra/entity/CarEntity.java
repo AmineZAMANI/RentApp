@@ -1,16 +1,23 @@
-package com.domain;
+package com.infra.entity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
+@Entity
 @Data
-public class Car {
+public class CarEntity {
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String model;
 	private boolean available = true;
 
-	public Car(String model) {
+	public CarEntity(String model) {
 		this.model = model;
 	}
 

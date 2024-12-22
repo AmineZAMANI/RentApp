@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.application.dtos.RentalDTO;
 import com.application.services.RentalApplicationService;
+import com.common.dtos.RentalDTO;
 
 @RestController
 @RequestMapping("/api/rentals")
