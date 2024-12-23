@@ -9,6 +9,7 @@ import com.application.exceptions.ErrorResponse;
 import com.infra.exceptions.CarAlreadyRentedException;
 import com.infra.exceptions.CarNotFoundException;
 import com.infra.exceptions.CustomerNotFoundException;
+import com.infra.exceptions.RentalNotFoundException;
 
 @ControllerAdvice
 public class RentalExceptionHandler {
@@ -28,6 +29,12 @@ public class RentalExceptionHandler {
     @ExceptionHandler(CustomerNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleCarNotFound(CustomerNotFoundException ex) {
         ErrorResponse errorResponse = new ErrorResponse("CUSTOMER_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+    
+    @ExceptionHandler(RentalNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleRentalNotFound(RentalNotFoundException ex) {
+        ErrorResponse errorResponse = new ErrorResponse("RENTAL_NOT_FOUND", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 }

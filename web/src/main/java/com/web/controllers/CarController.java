@@ -1,16 +1,17 @@
 package com.web.controllers;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.common.dtos.RentalDTO;
+import com.common.dtos.CarDTO;
 import com.domain.Rental;
-import com.web.services.RentalWebService;
+import com.web.services.CarWebService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,20 +19,20 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 @RestController
-@RequestMapping("/api/rentals")
-public class RentalController {
+@RequestMapping("/api/cars")
+public class CarController {
 
-    private final RentalWebService rentalWebService;
+    private final CarWebService carWebService;
 
-    public RentalController( RentalWebService rentalWebService) {
-        this.rentalWebService = rentalWebService;
+    public CarController( CarWebService carWebService) {
+        this.carWebService = carWebService;
     }
 
     @Operation(
-            summary = "Rent a car",
-            description = "Rent a car based on the provided data.",
+            summary = "Search a car by model",
+            description = "Search available cars by model",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful rent of available cars",
+                    @ApiResponse(responseCode = "200", description = "Successful search of available cars",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = Rental.class))),
                     @ApiResponse(responseCode = "400", description = "Invalid request parameters",
@@ -40,15 +41,11 @@ public class RentalController {
                             content = @Content)
             }
     )
-    @PostMapping("/rent")
-    @ResponseStatus(HttpStatus.CREATED)
-    public RentalDTO rentCar(@RequestBody RentalDTO rentalDTO) {
-        return rentalWebService.rentCar(rentalDTO);
+    @GetMapping("/")
+	@ResponseStatus(HttpStatus.OK)
+    public List<CarDTO> findCar(@RequestParam(value = "model", required = true) String model) {
+        return carWebService.findCar(model);
     }
 
-    @PostMapping("/return/{rentalId}")
-    public RentalDTO returnCar(@PathVariable Long rentalId) {
-        return rentalWebService.returnCar(rentalId);
-    }
 
 }

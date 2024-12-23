@@ -1,9 +1,10 @@
 package com.common.dtos;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @NoArgsConstructor
 public class CustomerDTO {
     private Long id;

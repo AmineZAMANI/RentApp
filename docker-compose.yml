@@ -1,56 +1,75 @@
 version: '3.8'
-
 services:
-
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: rentapp
     ports:
-      - "8080:8080"
+      - '8085:8080'
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rentapp
+      SPRING_DATASOURCE_URL: 'jdbc:postgresql://db:5432/rentapp'
       SPRING_DATASOURCE_USERNAME: pgadmin
       SPRING_DATASOURCE_PASSWORD: pgadmin
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: 'kafka:9092'
     depends_on:
       - db
       - kafka
-
+    networks:
+      - rental-network
   db:
-    image: postgres:15-alpine
+    image: 'postgres:15-alpine'
     container_name: rental-db-container
     environment:
       POSTGRES_USER: pgadmin
       POSTGRES_PASSWORD: pgadmin
       POSTGRES_DB: rentapp
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-
+      - 'postgres-data:/var/lib/postgresql/data'
+    networks:
+      - rental-network
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: 'confluentinc/cp-kafka:latest'
     container_name: rental-kafka-container
     ports:
-      - "9092:9092"
+      - '9092:9092'
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
-
+    networks:
+      - rental-network
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: 'confluentinc/cp-zookeeper:latest'
     container_name: rental-zookeeper-container
     ports:
-      - "2181:2181"
+      - '2181:2181'
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-
+    networks:
+      - rental-network
+  kafka-ui:
+    image: 'provectuslabs/kafka-ui:latest'
+    container_name: rental-kafka-ui-container
+    ports:
+      - '8089:8080'
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka:9092'
+      KAFKA_CLUSTERS_0_ZOOKEEPER: 'zookeeper:2181'
+    depends_on:
+      - kafka
+      - zookeeper
+    networks:
+      - rental-network
 volumes:
   postgres-data:
+networks:
+  rental-network:
+    driver: bridge

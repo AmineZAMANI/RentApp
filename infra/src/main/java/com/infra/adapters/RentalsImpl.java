@@ -1,10 +1,12 @@
 package com.infra.adapters;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Repository;
 
 import com.domain.Car;
 import com.domain.Customer;
 import com.domain.Rental;
+import com.domain.event.CarRentedEvent;
 import com.domain.repositories.Rentals;
 import com.domain.usecases.RentalUseCase;
 import com.infra.entity.CarEntity;
@@ -16,37 +18,28 @@ import com.infra.entity.mappers.RentalEntityMapper;
 import com.infra.exceptions.CarAlreadyRentedException;
 import com.infra.exceptions.CarNotFoundException;
 import com.infra.exceptions.CustomerNotFoundException;
-import com.infra.kafka.EventPublisher;
+import com.infra.exceptions.RentalNotFoundException;
 import com.infra.repositories.CarRepository;
 import com.infra.repositories.CustomerRepository;
 import com.infra.repositories.RentalRepository;
 
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Repository
+@AllArgsConstructor
 public class RentalsImpl implements Rentals {
 
 	private final com.domain.usecases.RentalUseCase rentalService = new RentalUseCase();
 	private final CarRepository carRepository;
 	private final CustomerRepository customerRepository;
 	private final RentalRepository rentalRepository;
-	private final EventPublisher carRentalProducer;
-	private final EventPublisher carReturnProducer;
 	private final RentalEntityMapper rentalEntityMapper;
 	private final CarEntityMapper carEntityMapper;
 	private final CustomerEntityMapper customerEntityMapper;
 
-	public RentalsImpl(CarRepository carRepository, CustomerRepository customerRepository,
-			RentalRepository rentalRepository, EventPublisher carRentalProducer, EventPublisher carReturnProducer,
-			RentalEntityMapper rentalEntityMapper, CarEntityMapper carEntityMapper,
-			CustomerEntityMapper customerEntityMapper) {
-		this.carRepository = carRepository;
-		this.customerRepository = customerRepository;
-		this.rentalRepository = rentalRepository;
-		this.carReturnProducer = carReturnProducer;
-		this.carRentalProducer = carRentalProducer;
-		this.rentalEntityMapper = rentalEntityMapper;
-		this.carEntityMapper = carEntityMapper;
-		this.customerEntityMapper = customerEntityMapper;
-	}
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Override
 	public Rental rent(Rental rental) {
@@ -55,39 +48,51 @@ public class RentalsImpl implements Rentals {
 				.orElseThrow(() -> new CarNotFoundException("Car not found"));
 		CustomerEntity customerEntity = customerRepository.findById(rental.getCustomer().getId())
 				.orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
-		
+
 		Car car = toCar(carEntity);
 		Customer customer = toCustomer(customerEntity);
 		
-		if (!rentalService.isRentalAllowed(car, customer, rental.getRentalPeriod().getStartDate(),
-				rental.getRentalPeriod().getEndDate())) {
-			throw new CarAlreadyRentedException("Rental not allowed");
-		}
+		checkAvailability(rental, car, customer);
+		
+		RentalEntity persistentRental = persistRental(rental, car);
+		
+		log.info("Car successfully rented with rental ID: {}", persistentRental .getId());
+		CarRentedEvent event = CarRentedEvent.builder().rentalId(persistentRental .getId().toString())
+				.carId(persistentRental .getCar().getId().toString()).customerId(persistentRental .getCustomer().getId().toString())
+				.rentalStartDate(persistentRental .getRentalPeriod().getStartDate().toString())
+				.rentalEndDate(persistentRental .getRentalPeriod().getEndDate().toString()).build();
+		eventPublisher.publishEvent(event);
+
+		return toRental(persistentRental);
+	}
+
+	private RentalEntity persistRental(Rental rental, Car car) {
 		rental.setCar(car);
 		rental.calculateDurationInDays();
 		rental.rentCar();
 		RentalEntity persistentRental = rentalRepository.save(toRentalEntity(rental));
-		carRepository.save(toCarEntity(car));
-		/** Publish a message to notify other systems about the car rental */
-		this.carRentalProducer
-				.publish("The car " + rental.getCar().getModel() + " was rented by " + rental.getCustomer().getName());
-		return toRental(persistentRental);
+		carRepository.saveAndFlush(toCarEntity(car));
+		return persistentRental;
+	}
+
+	private void checkAvailability(Rental rental, Car car, Customer customer) {
+		if (!rentalService.isRentalAllowed(car, customer, rental.getRentalPeriod().getStartDate(),
+				rental.getRentalPeriod().getEndDate())) {
+			throw new CarAlreadyRentedException("Rental not allowed");
+		}
 	}
 
 	@Override
 	public Rental returnCar(Rental rental) {
-		
+
 		RentalEntity rentatEntity = rentalRepository.findById(rental.getId())
-				.orElseThrow(() -> new IllegalArgumentException("Rental not found"));
-		
+				.orElseThrow(() -> new RentalNotFoundException("Rental not found"));
+
 		Rental rentalDomain = toRental(rentatEntity);
 		rentalDomain.returnCar();
 		RentalEntity entity = toRentalEntity(rentalDomain);
 		rentalRepository.save(entity);
 		carRepository.save(entity.getCar());
-		/** Publish a message to notify other systems about the car return change */
-		this.carReturnProducer.publish("The car " + rentatEntity.getCar().getId() + " was returned by "
-				+ rentatEntity.getCustomer().getName());
 		return toRental(rentatEntity);
 	}
 

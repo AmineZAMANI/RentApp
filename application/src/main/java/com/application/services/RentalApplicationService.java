@@ -22,4 +22,6 @@ public class RentalApplicationService {
     public Rental returnCar(Rental rental) {
         return rentals.returnCar(rental);
     }
+    
+    
 }
